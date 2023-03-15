@@ -55,6 +55,10 @@ class TrimModel(nn.Module):
         # take residuals into account
         if self.use_residuals:
             assert x_orig is not None, "if using residuals, must also pass untransformed original image!"
+            if len(x_orig.shape) == 4:
+                x = x[:, :, :x_orig.shape[2], :x_orig.shape[3]]
+            else:
+                x = x[:, :, :x_orig.shape[2]]
             res = x_orig - x.detach()
             x = x + res
 

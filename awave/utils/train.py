@@ -137,7 +137,12 @@ class Trainer():
         
         # reconstruction
         recon_data = self.wt_inverse(data_t)
-        
+
+        if len(data.shape) == 4:
+            recon_data = recon_data[:, :, :data.shape[2], :data.shape[3]]
+        else:
+            recon_data = recon_data[:, :, :data.shape[2]]
+
         # TRIM score
         if self.attributer is not None:
             with torch.backends.cudnn.flags(enabled=False):
