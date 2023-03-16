@@ -36,11 +36,13 @@ class Trainer():
                  device=torch.device("cuda"),
                  use_residuals=True,
                  attr_methods='InputXGradient',
-                 n_print=1):
+                 n_print=1,
+                 cudnn_enabled=False):
 
         self.device = device
         self.is_parallel = 'data_parallel' in str(type(w_transform))
         self.wt_inverse = w_transform.module.inverse if self.is_parallel else w_transform.inverse  # use multiple GPUs or not
+        self.cudnn_enabled = cudnn_enabled
         if model is not None:
             self.model = model.to(self.device)
             self.mt = TrimModel(model, self.wt_inverse, use_residuals=use_residuals)
@@ -145,7 +147,7 @@ class Trainer():
 
         # TRIM score
         if self.attributer is not None:
-            with torch.backends.cudnn.flags(enabled=False):
+            with torch.backends.cudnn.flags(enabled=self.cudnn_enabled):
                 attributions = self.attributer(
                     data_t, target=self.target,
                     additional_forward_args=deepcopy(
